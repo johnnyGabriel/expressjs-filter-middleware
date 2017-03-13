@@ -1,40 +1,3 @@
-const schema = require('../rionet-api/Models/Produto').schema.obj
-
-const either = ( case1, case2 ) =>
-    case1 || case2
-
-const merge = ( obj1, obj2 ) =>
-    Object.assign( {}, obj1, obj2 )
-
-const pick = ( keys, obj ) => {
-
-    if ( typeof keys == 'string' )
-        var keys = [ keys ]
-
-    return keys.reduce( (acc, key) => {
-
-        if ( obj[ key ] )
-            acc[ key ] = obj[ key ]
-
-        return acc
-
-    }, {})
-
-}
-
-const reduceObject = (obj, fn) => {
-
-    if ( typeof fn != 'function' )
-        return obj
-
-    return Object.keys( obj ).reduce( ( acc, key ) => {
-
-        return fn( acc, obj[ key ], key, obj )
-
-    }, {})
-
-}
-
 const OPERATORS = {
 
     eq( field, val, fieldType ) {
@@ -57,17 +20,17 @@ const OPERATORS = {
     }
 }
 
-const CONFIG = {
-    price: ['eq', 'gt', 'lt', 'bt'],
-    status: 'eq',
-    date: ['eq', 'gt', 'lt', 'bt']
-}
+// const CONFIG = {
+//     price: ['eq', 'gt', 'lt', 'bt'],
+//     status: 'eq',
+//     date: ['eq', 'gt', 'lt', 'bt']
+// }
 
-const QUERY = {
-    price: 'lt:10',
-    status: '1',
-    date: 'bt:2017-01-21,2017-01-23'
-}
+// const QUERY = {
+//     price: 'lt:10',
+//     status: '1',
+//     date: 'bt:2017-01-21,2017-01-23'
+// }
 
 let nObj = reduceObject( QUERY, ( acc, val, key, obj ) => {
 
@@ -109,7 +72,17 @@ let nObj = reduceObject( QUERY, ( acc, val, key, obj ) => {
 
 })
 
-console.log(
-    JSON.stringify( QUERY, null, 2),
-    JSON.stringify( nObj , null, 2 )
+// module.exports = 
+
+/*  Example use
+app.use(
+    // Schema, config >> fn
+    query(
+        Produto.schema, {
+            price: 'eq gt lt bt',
+            status: 'eq',
+            date: 'eq gt lt bt'
+        }
+    )
 )
+*/
