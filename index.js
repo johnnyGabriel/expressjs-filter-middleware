@@ -28,8 +28,9 @@ const OPERATORS = {
     }
 }
 
-const transformQuery = ( query, userConfig, schema ) =>
-    reduceObject( query, ( acc, val, key, obj ) => {
+module.exports = ( modelSchema, userConfig ) => {
+
+    const transformQuery = ( acc, val, key, obj ) => {
 
         // check if field is queryable
         if ( !userConfig[ key ] )
@@ -37,8 +38,8 @@ const transformQuery = ( query, userConfig, schema ) =>
 
         let fieldOps = pick( userConfig[ key ], OPERATORS ),
             fieldType = either(
-                schema[ key ][ 'type' ],
-                schema[ key ]
+                modelSchema[ key ][ 'type' ],
+                modelSchema[ key ]
             )
 
         // fix date(time) string with ':'
@@ -62,17 +63,11 @@ const transformQuery = ( query, userConfig, schema ) =>
         }
 
         return acc
-    })
-
-module.exports = ( modelSchema, userConfig ) => {
+    }
 
     return ( req, res, next ) => {
 
-        req.query = transformQuery(
-            req.query,
-            userConfig,
-            modelSchema
-        )
+        req.query = reduceObject( req.query, transformQuery )
         next()
 
     }
