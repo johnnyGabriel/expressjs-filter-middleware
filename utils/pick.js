@@ -1,7 +1,7 @@
 module.exports = ( keys, obj ) => {
 
     if ( typeof keys == 'string' )
-        var keys = [ keys ]
+        var keys = keys.split(' ')
 
     return keys.reduce( (acc, key) => {
 

@@ -9,6 +9,12 @@ describe('pick util', function() {
         done()
     })
 
+    it('test string keys pick', function(done) {
+        let obj = { x: 0, y: 1, z: 2 }
+        assert.deepEqual(pick('x y', obj), { x: 0, y: 1 })
+        done()
+    })
+
     it('test array key pick', function(done) {
         let obj = { x: 0, y: 1, z: 2 }
         assert.deepEqual(pick(['x'], obj), { x: 0 })

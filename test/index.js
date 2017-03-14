@@ -20,13 +20,13 @@ describe('query express middleware', function() {
             // only perm. 'eq' op
             status: 'eq',
             // perm. all default op
-            age: ['eq', 'gt', 'lt', 'bt'],
+            age: 'eq gt lt bt',
             // perm. all default op
-            lastAccess: ['eq', 'gt', 'lt', 'bt'],
+            lastAccess: 'eq gt lt bt',
             // only perm. 'gt' op
             totalAccess: 'gt',
             // only perm. 'eq' and 'bt' op - this prop doesn't exist, just test
-            otherField: ['eq', 'bt'],
+            otherField: 'eq bt',
         }
 
         // simulate 'app.use()'
