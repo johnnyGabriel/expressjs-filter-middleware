@@ -1,3 +1,8 @@
+const either = require('./utils/either')
+const merge = require('./utils/merge')
+const pick = require('./utils/pick')
+const reduceObject = require('./utils/reduceObject')
+
 const OPERATORS = {
 
     eq( field, val, fieldType ) {
@@ -16,63 +21,63 @@ const OPERATORS = {
 
     bt( field, val, fieldType) {
         let split = val.split(',')
-        return { $gt: split[0], $lt: split[1] }
+        return {
+            $gt: new fieldType( split[0] ),
+            $lt: new fieldType( split[1] )
+        }
     }
 }
 
-// const CONFIG = {
-//     price: ['eq', 'gt', 'lt', 'bt'],
-//     status: 'eq',
-//     date: ['eq', 'gt', 'lt', 'bt']
-// }
+const transformQuery = ( query, userConfig, schema ) =>
+    reduceObject( query, ( acc, val, key, obj ) => {
 
-// const QUERY = {
-//     price: 'lt:10',
-//     status: '1',
-//     date: 'bt:2017-01-21,2017-01-23'
-// }
+        // check if field is queryable
+        if ( !userConfig[ key ] )
+            return acc
 
-let nObj = reduceObject( QUERY, ( acc, val, key, obj ) => {
+        let fieldOps = pick( userConfig[ key ], OPERATORS ),
+            fieldType = either(
+                schema[ key ][ 'type' ],
+                schema[ key ]
+            )
 
-    // checa se a key é disp. pelo usuario
-    if ( CONFIG[key] === undefined ) {
-        return acc
-    }
+        // fix date(time) string with ':'
+        let split = val.substr(0, 10).split(/([:])/)
+        let opValue = split.slice(2).join('')
+        let op = !opValue ? 'eq' : split[0]
 
-    let fieldOps = pick( CONFIG[ key ], OPERATORS ),
-        fieldType = either(
-            schema[ key ][ 'type' ],
-            schema[ key ]
-        )
+        // call operations
+        if ( fieldOps[ op ] ) {
 
-    // this fix date string with ':'
-    let split = val.split(/([:])/)
-    let opValue = split.slice(2).join('')
-    let op = !opValue ? 'eq' : split[0]
+            let fieldQuery = fieldOps[ op ].call(
+                {},
+                key,
+                opValue || val,
+                fieldType
+            )
 
-    // aplica ops disp. pelo usuario
-    if ( fieldOps[ op ] ) {
-
-        let fieldNewValue = fieldOps[ op ].call(
-            {},
-            key,
-            opValue || val,
-            fieldType
-        )
-
-        if ( acc[ key ] ) {
-            acc[ key ] = merge( acc[ key ], fieldNewValue )
+            acc[ key ] = acc[ key ] ?
+                merge( acc[ key ], fieldQuery ) : fieldQuery
+                
         }
-        else
-            acc[ key ] = fieldNewValue
-            
+
+        return acc
+    })
+
+module.exports = ( modelSchema, userConfig ) => {
+
+    return ( req, res, next ) => {
+
+        req.query = transformQuery(
+            req.query,
+            userConfig,
+            modelSchema
+        )
+        next()
+
     }
 
-    return acc
-
-})
-
-// module.exports = 
+}
 
 /*  Example use
 app.use(
