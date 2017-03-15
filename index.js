@@ -28,6 +28,12 @@ const OPERATORS = {
 
 const convertType = ( type, val ) => {
 
+    if (!type)
+        return val
+
+    if (!val)
+        return ''
+
     switch( type ) {
 
         case Boolean:
@@ -60,15 +66,18 @@ module.exports = ( modelSchema, userConfig ) => {
             return acc
 
         let fieldOps = pick( userConfig[ key ], OPERATORS ),
-            fieldType = either(
-                modelSchema[ key ][ 'type' ],
-                modelSchema[ key ]
-            )
+            fieldType = !modelSchema[ key ] ?
+                null : modelSchema[ key ][ 'type' ] || modelSchema[ key ]
 
-        // fix date(time) string with ':'
-        let split = val.substr(0, 10).split(/([:])/)
-        let opValue = split.slice(2).join('')
-        let op = !opValue ? 'eq' : split[0]
+        // avoid getting the ':' char of a datestring
+        let delimiter = val.substr( 0, 5 ).search(':')
+
+        // if it does not have a declared op, then its a 'eq'
+        let op = either(
+            val.substr( 0, delimiter ), 'eq'
+        )
+
+        let opValue = val.substr( delimiter + 1 )
 
         // call operations
         if ( fieldOps[ op ] ) {
