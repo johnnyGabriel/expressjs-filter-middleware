@@ -6,26 +6,49 @@ const reduceObject = require('./utils/reduceObject')
 const OPERATORS = {
 
     eq( field, val, fieldType ) {
-        if ( fieldType == Boolean )
-            var val = Number( val )
-        return new fieldType( val )
+        return convertType( fieldType, val )
     },
 
     lt( field, val, fieldType ) {
-        return { $lt: new fieldType( val ) }
+        return { $lt: convertType( fieldType, val ) }
     },
 
     gt( field, val, fieldType ) {
-        return { $gt: new fieldType( val ) }
+        return { $gt: convertType( fieldType, val ) }
     },
 
-    bt( field, val, fieldType) {
+    bt( field, val, fieldType ) {
         let split = val.split(',')
         return {
-            $gt: new fieldType( split[0] ),
-            $lt: new fieldType( split[1] )
+            $gt: convertType( fieldType, split[0] ),
+            $lt: convertType( fieldType, split[1] )
         }
     }
+}
+
+const convertType = ( type, val ) => {
+
+    switch( type ) {
+
+        case Boolean:
+            return Boolean(
+                Number( val )
+            )
+
+        case String:
+            return String( val )
+
+        case Number:
+            return Number( val )
+
+        case Date:
+            return new Date( val )
+
+        default:
+            return val
+
+    }
+
 }
 
 module.exports = ( modelSchema, userConfig ) => {

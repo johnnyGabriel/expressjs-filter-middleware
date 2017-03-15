@@ -57,13 +57,10 @@ describe('query express middleware', function() {
                     $gt: 18,
                     $lt: 30
                 },
-                lastAccess: '2017-01-01T12:59:59.000Z'
+                lastAccess: new Date('2017-01-01T12:59:59')
             }
 
-            assert.equal(
-                JSON.stringify(expected),
-                JSON.stringify(req.query)
-            )
+            assert.deepEqual(req.query,expected)
 
             done()
 
