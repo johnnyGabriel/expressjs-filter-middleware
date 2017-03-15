@@ -10,7 +10,8 @@ describe('query express middleware', function() {
             field2: String,
             field3: Number,
             field4: Boolean,
-            field5: String
+            field5: String,
+            field7: Number
         }
 
         let fieldsConfig = {
@@ -19,7 +20,8 @@ describe('query express middleware', function() {
             field3: 'eq bt',
             field4: 'eq',
             field5: 'eq',
-            field6: 'eq gt lt bt'
+            field6: 'eq gt lt bt',
+            field7: 'eq'
         }
 
         let middleware = queryMiddleware(modelSchema, fieldsConfig)
@@ -31,7 +33,8 @@ describe('query express middleware', function() {
                 field3: 'lt:10',
                 field4: 'bt:0,1',
                 field5: 'lorem',
-                field6: '10'
+                field6: '10',
+                field7: ['10', '20']
             }
         }
 
@@ -39,7 +42,8 @@ describe('query express middleware', function() {
 
             let expected = {
                 field5: 'lorem',
-                field6: '10'
+                field6: '10',
+                field7: 10
             }
 
             assert.deepEqual(req.query, expected)

@@ -65,8 +65,12 @@ module.exports = ( modelSchema, userConfig ) => {
         if ( !userConfig[ key ] )
             return acc
 
-        let fieldOps = pick( userConfig[ key ], OPERATORS ),
-            fieldType = !modelSchema[ key ] ?
+        if ( val instanceof Array )
+            var val = val[0]
+
+        let fieldOps = pick( userConfig[ key ], OPERATORS )
+
+        let fieldType = !modelSchema[ key ] ?
                 null : modelSchema[ key ][ 'type' ] || modelSchema[ key ]
 
         // avoid getting the ':' char of a datestring
