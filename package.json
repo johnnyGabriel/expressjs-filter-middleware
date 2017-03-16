@@ -1,7 +1,7 @@
 {
   "name": "mongooqs",
   "version": "1.0.0",
-  "description": "Mongoose querystring for create mongoDb queries",
+  "description": "Express.js middleware to create MongoDB queries with mongoose through querystring",
   "main": "index.js",
   "scripts": {
     "start": "yarn install || npm install",
