@@ -1,13 +1,13 @@
 {
-  "name": "expressjs-filter-middleware",
+  "name": "mongooqs",
   "version": "1.0.0",
-  "description": "",
+  "description": "Mongoose querystring for create mongoDb queries",
   "main": "index.js",
   "scripts": {
     "start": "yarn install || npm install",
     "test": "mocha test/**/*.js"
   },
-  "author": "",
+  "author": "Johnny Gabriel <johnny_gabrie@outlook.com>",
   "license": "ISC",
   "dependencies": {
     "mocha": "^3.2.0"
