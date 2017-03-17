@@ -9,7 +9,7 @@
   },
   "author": "Johnny Gabriel <johnny_gabrie@outlook.com>",
   "license": "ISC",
-  "dependencies": {
+  "devDependencies": {
     "mocha": "^3.2.0"
   }
 }
