@@ -6,35 +6,35 @@ const reduceObject = require('./utils/reduceObject')
 let operators = {
 
     eq( field, val, fieldType ) {
-        return convertType( fieldType, val )
+        return typify( fieldType, val )
     },
 
     lt( field, val, fieldType ) {
-        return { $lt: convertType( fieldType, val ) }
+        return { $lt: typify( fieldType, val ) }
     },
 
     lte( field, val, fieldType ) {
-        return { $lte: convertType( fieldType, val ) }
+        return { $lte: typify( fieldType, val ) }
     },
 
     gt( field, val, fieldType ) {
-        return { $gt: convertType( fieldType, val ) }
+        return { $gt: typify( fieldType, val ) }
     },
 
     gte( field, val, fieldType ) {
-        return { $gte: convertType( fieldType, val ) }
+        return { $gte: typify( fieldType, val ) }
     },
 
     bt( field, val, fieldType ) {
         let split = val.split(',')
         return {
-            $gt: convertType( fieldType, split[0] ),
-            $lt: convertType( fieldType, split[1] )
+            $gt: typify( fieldType, split[0] ),
+            $lt: typify( fieldType, split[1] )
         }
     }
 }
 
-let convertType = ( type, val ) => {
+let typify = ( type, val ) => {
 
     if (!type)
         return val
@@ -122,3 +122,4 @@ module.exports = ( modelSchema, userConfig ) => {
 }
 
 module.exports.extend = extend
+module.exports.typify = typify

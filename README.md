@@ -61,11 +61,11 @@ Mongo query will be on req.query
 
 To extend operations:
 
-    let { conversor } = mongooqs
+    let { typify } = mongooqs
 
     mongooqs.extend({
         gte( field, val, fieldType ) {
-            return { $gte: conversor( fieldType, val ) }
+            return { $gte: typify( fieldType, val ) }
         }
     })
 
