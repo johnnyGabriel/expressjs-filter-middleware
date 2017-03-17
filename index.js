@@ -3,7 +3,7 @@ const merge = require('./utils/merge')
 const pick = require('./utils/pick')
 const reduceObject = require('./utils/reduceObject')
 
-const OPERATORS = {
+let operators = {
 
     eq( field, val, fieldType ) {
         return convertType( fieldType, val )
@@ -13,8 +13,16 @@ const OPERATORS = {
         return { $lt: convertType( fieldType, val ) }
     },
 
+    lte( field, val, fieldType ) {
+        return { $lte: convertType( fieldType, val ) }
+    },
+
     gt( field, val, fieldType ) {
         return { $gt: convertType( fieldType, val ) }
+    },
+
+    gte( field, val, fieldType ) {
+        return { $gte: convertType( fieldType, val ) }
     },
 
     bt( field, val, fieldType ) {
@@ -26,7 +34,7 @@ const OPERATORS = {
     }
 }
 
-const convertType = ( type, val ) => {
+let convertType = ( type, val ) => {
 
     if (!type)
         return val
@@ -57,6 +65,9 @@ const convertType = ( type, val ) => {
 
 }
 
+const extend = customOps =>
+    Object.assign( operators, customOps )
+
 module.exports = ( modelSchema, userConfig ) => {
 
     const transformQuery = ( acc, val, key, obj ) => {
@@ -68,7 +79,7 @@ module.exports = ( modelSchema, userConfig ) => {
         if ( val instanceof Array )
             var val = val[0]
 
-        let fieldOps = pick( userConfig[ key ], OPERATORS )
+        let fieldOps = pick( userConfig[ key ], operators )
 
         let fieldType = !modelSchema[ key ] ?
                 null : modelSchema[ key ][ 'type' ] || modelSchema[ key ]
@@ -110,15 +121,4 @@ module.exports = ( modelSchema, userConfig ) => {
 
 }
 
-/*  Example use
-app.use(
-    // Schema, config >> fn
-    query(
-        Produto.schema, {
-            price: 'eq gt lt bt',
-            status: 'eq',
-            date: 'eq gt lt bt'
-        }
-    )
-)
-*/
+module.exports.extend = extend

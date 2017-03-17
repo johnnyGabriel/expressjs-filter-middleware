@@ -52,12 +52,28 @@ Mongo query will be on req.query
 
 *default operations:
 
-    eq: equal,
-    gt: greather than,
-    lt: lower than,
-    bt: between
+    eq: equal | Mongo query { field: value }
+    gt: greather than | Mongo query { field: { $gt: value } }
+    gte: greater than or equal | Mongo query { field: { $gte: value } }
+    lt: lower than | Mongo query { field: { $lt: value } }
+    lte: lower than or equal | Mongo query { field: { $lte: value } }
+    bt: between | Mongo query { field: { $gt: value1, $lt: value2 } }
 
-To extend operations: soon...
+To extend operations:
+
+    let { conversor } = mongooqs
+
+    mongooqs.extend({
+        gte( field, val, fieldType ) {
+            return { $gte: conversor( fieldType, val ) }
+        }
+    })
+
+    app.use('/users',
+        mongooqs(User.schema.obj, {
+            age: 'gte'
+        })
+    )
 
 
 ## Dev
