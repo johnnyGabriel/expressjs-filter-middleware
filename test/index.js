@@ -43,7 +43,7 @@ describe('query express middleware', function() {
             let expected = {
                 field5: 'lorem',
                 field6: '10',
-                field7: 10
+                field7: [10, 20]
             }
 
             assert.deepEqual(req.query, expected)
@@ -281,6 +281,38 @@ describe('query express middleware', function() {
 
         })
 
+    })
+
+    it('test multiple operations per field', function(done) {
+
+        let modelSchema = {
+            field: Number,
+        }
+
+        let fieldsConfig = {
+            field: 'gt lt'
+        }
+
+        let middleware = queryMiddleware(modelSchema, fieldsConfig)
+
+        let req = {
+            query: {
+                field: ['gt:5', 'lt:10']
+            }
+        }
+
+        middleware(req, {}, function() {
+
+            let expected = {
+                field: { $gt: 5, $lt: 10 }
+            }
+
+            assert.deepEqual(req.query, expected)
+
+            done()
+
+        })
+        
     })
 
 })

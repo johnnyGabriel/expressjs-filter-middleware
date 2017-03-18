@@ -70,46 +70,56 @@ const extend = customOps =>
 
 module.exports = ( modelSchema, userConfig ) => {
 
-    const transformQuery = ( acc, val, key, obj ) => {
+    const transformQuery = ( acc, val, field, obj ) => {
 
         // check if field is queryable
-        if ( !userConfig[ key ] )
+        if ( !userConfig[ field ] )
             return acc
 
-        if ( val instanceof Array )
-            var val = val[0]
+        let fieldOperators = pick( userConfig[ field ], operators )
 
-        let fieldOps = pick( userConfig[ key ], operators )
+        let fieldOperations = ( typeof val == 'object' ) ? val : [val]
 
-        let fieldType = !modelSchema[ key ] ?
-                null : modelSchema[ key ][ 'type' ] || modelSchema[ key ]
+        let fieldType = !modelSchema[ field ] ?
+                null : modelSchema[ field ][ 'type' ] || modelSchema[ field ]
 
-        // avoid getting the ':' char of a datestring
-        let delimiter = val.substr( 0, 5 ).search(':')
+        const transformOperation = ( acc, operation ) => {
 
-        // if it does not have a declared op, then its a 'eq'
-        let op = either(
-            val.substr( 0, delimiter ), 'eq'
-        )
+            // avoid getting the ':' char of a datestring
+            let delimiter = operation.substr( 0, 5 ).search(':')
 
-        let opValue = val.substr( delimiter + 1 )
-
-        // call operations
-        if ( fieldOps[ op ] ) {
-
-            let fieldQuery = fieldOps[ op ].call(
-                {},
-                key,
-                opValue || val,
-                fieldType
+            // if it does not have a declared op, then its a 'eq'
+            let op = either(
+                operation.substr( 0, delimiter ), 'eq'
             )
 
-            acc[ key ] = acc[ key ] ?
-                merge( acc[ key ], fieldQuery ) : fieldQuery
-                
+            let opValue = op == 'eq' ?
+                operation : operation.substr( delimiter + 1 )
+
+            // call operations
+            if ( fieldOperators[ op ] ) {
+
+                let build = fieldOperators[ op ].call(
+                    {},
+                    field,
+                    opValue,
+                    fieldType
+                )
+
+                acc[ field ] = acc[ field ] ?
+                    merge( acc[ field ], build ) : build
+
+            }
+
+            return acc
+
         }
 
-        return acc
+        return merge(
+            acc,
+            fieldOperations.reduce( transformOperation, {} )
+        )
+
     }
 
     return ( req, res, next ) => {
