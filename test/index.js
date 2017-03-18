@@ -1,7 +1,7 @@
 const assert = require('assert')
-const queryMiddleware = require('../index')
+const mongooqs = require('../index')
 
-describe('query express middleware', function() {
+describe('mongooqs express middleware', function() {
 
     it('test fieldsConfig', function(done) {
 
@@ -24,7 +24,7 @@ describe('query express middleware', function() {
             field7: 'eq'
         }
 
-        let middleware = queryMiddleware(modelSchema, fieldsConfig)
+        let middleware = mongooqs(modelSchema, fieldsConfig)
 
         let req = {
             query: {
@@ -70,7 +70,7 @@ describe('query express middleware', function() {
             dateField4: 'bt',
         }
 
-        let middleware = queryMiddleware(modelSchema, fieldsConfig)
+        let middleware = mongooqs(modelSchema, fieldsConfig)
 
         let req = {
             query: {
@@ -118,7 +118,7 @@ describe('query express middleware', function() {
             numberField4: 'bt',
         }
 
-        let middleware = queryMiddleware(modelSchema, fieldsConfig)
+        let middleware = mongooqs(modelSchema, fieldsConfig)
 
         let req = {
             query: {
@@ -162,7 +162,7 @@ describe('query express middleware', function() {
             boolField2: 'eq'
         }
 
-        let middleware = queryMiddleware(modelSchema, fieldsConfig)
+        let middleware = mongooqs(modelSchema, fieldsConfig)
 
         let req = {
             query: {
@@ -196,7 +196,7 @@ describe('query express middleware', function() {
             stringField: 'eq'
         }
 
-        let middleware = queryMiddleware(modelSchema, fieldsConfig)
+        let middleware = mongooqs(modelSchema, fieldsConfig)
 
         let req = {
             query: {
@@ -218,65 +218,50 @@ describe('query express middleware', function() {
 
     })
 
-    it('test geral possibilities', function(done) {
+    it('test all operators', function(done) {
 
-        // model schema passed on middleware declaration
         let modelSchema = {
-            status: Boolean,
-            name: String,
-            age: { type: Number },
-            lastAccess: Date,
-            totalAccess: Number,
-            isGranted: Boolean
+            fieldEq: String,
+            fieldGt: Number,
+            fieldGte: Number,
+            fieldLt: Number,
+            fieldLte: Number,
+            fieldBt: Number
         }
 
-        // fields that can be queryed, passed on middleware declaration
         let fieldsConfig = {
-            // only perm. 'eq' op
-            status: 'eq',
-            // perm. all default op
-            age: 'eq gt lt bt',
-            // perm. all default op
-            lastAccess: 'eq gt lt bt',
-            // only perm. 'gt' op
-            totalAccess: 'gt',
-            // only perm. 'eq' and 'bt' op - this prop doesn't exist, just test
-            otherField: 'eq bt',
+            fieldEq: 'eq',
+            fieldGt: 'gt',
+            fieldGte: 'gte',
+            fieldLt: 'lt',
+            fieldLte: 'lte',
+            fieldBt: 'bt'
         }
 
-            // simulate 'app.use()'
-        let middleware = queryMiddleware(modelSchema, fieldsConfig)
+        let middleware = mongooqs(modelSchema, fieldsConfig)
 
-        // simulate a request object with query prop
         let req = {
             query: {
-                // must return, have 'eq' op
-                status: '1',
-                // must return, have 'bt' op
-                age: 'bt:18,30',
-                // must return, with ms concat., have 'eq' op
-                lastAccess: '2017-01-01T12:59:59',
-                // must not return, field just have 'gt' op
-                totalAccess: '30',
-                // must not return, is not on the list
-                isGranted: '1'
+                fieldEq: 'lorem',
+                fieldGt: 'gt:5',
+                fieldGte: 'gte:10',
+                fieldLt: 'lt:15',
+                fieldLte: 'lte:15',
+                fieldBt: 'bt:1,10'
             }
         }
 
-        // simulate a request occurence with middleware call
         middleware(req, {}, function() {
 
             let expected = {
-                status: true,
-                age: {
-                    $gt: 18,
-                    $lt: 30
-                },
-                lastAccess: new Date('2017-01-01T12:59:59')
+                fieldEq: 'lorem',
+                fieldGt: { $gt: 5 },
+                fieldGte: { $gte: 10 },
+                fieldLt: { $lt: 15 },
+                fieldLte: { $lte: 15 },
+                fieldBt: { $gt: 1, $lt: 10 }
             }
-
-            assert.deepEqual(req.query,expected)
-
+            assert.deepEqual(req.query, expected)
             done()
 
         })
@@ -286,14 +271,14 @@ describe('query express middleware', function() {
     it('test multiple operations per field', function(done) {
 
         let modelSchema = {
-            field: Number,
+            field: Number
         }
 
         let fieldsConfig = {
             field: 'gt lt'
         }
 
-        let middleware = queryMiddleware(modelSchema, fieldsConfig)
+        let middleware = mongooqs(modelSchema, fieldsConfig)
 
         let req = {
             query: {
@@ -313,6 +298,35 @@ describe('query express middleware', function() {
 
         })
         
+    })
+
+    it('test custom operators', function(done) {
+
+        let { typify } = mongooqs
+
+        mongooqs.extend({
+            cc (field, val, fieldType) {
+                return { $cc: typify(fieldType, val) }
+            }
+        })
+
+        let modelSchema = { field: Number }
+        let fieldsConfig = { field: 'cc' }
+        let middleware = mongooqs(modelSchema, fieldsConfig)
+        let req = {
+            query: {
+                field: 'cc:50'
+            }
+        }
+
+        middleware(req, {}, function() {
+
+            let expected = { field: { $cc: 50 } }
+            assert.deepEqual(req.query, expected)
+            done()
+
+        })
+
     })
 
 })
