@@ -16,7 +16,7 @@ module.exports = ( modelSchema, userConfig ) => {
 
         let fieldOperators = pick( userConfig[ field ], operators )
 
-        let fieldOperations = ( typeof val == 'object' ) ? val : [val]
+        let queryOperations = ( typeof val == 'object' ) ? val : [val]
 
         let fieldType = !modelSchema[ field ] ?
                 null : modelSchema[ field ][ 'type' ] || modelSchema[ field ]
@@ -55,7 +55,7 @@ module.exports = ( modelSchema, userConfig ) => {
 
         return merge(
             acc,
-            fieldOperations.reduce( transformOperation, {} )
+            queryOperations.reduce( transformOperation, {} )
         )
 
     }
